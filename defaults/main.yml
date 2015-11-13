@@ -1,0 +1,6 @@
+---
+iptables_allowed_tcp_ports: [ 22 ]
+iptables_allowed_udp_ports: []
+iptables_forwarded_tcp_ports: []
+iptables_forwarded_udp_ports: []
+iptables_additional_rules: []

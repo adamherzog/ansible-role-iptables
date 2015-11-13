@@ -1,0 +1,29 @@
+---
+- name: install iptables
+  yum:
+    name: iptables
+    state: present
+
+- name: install firewall rules
+  template:
+    dest: /etc/iptables.firewall.rules
+    src: iptables.firewall.rules.j2
+    owner: root
+    group: root
+    mode: 0640
+    backup: yes
+  register: install_firewall_rules
+
+- name: activate firewall rules
+  shell: iptables-restore < /etc/iptables.firewall.rules
+  when: install_firewall_rules|changed
+
+- name: save firewall rules
+  command: service iptables save
+  when: install_firewall_rules|changed
+
+- name: ensure iptables is running and enabled
+  service:
+    name: iptables
+    state: started
+    enabled: yes

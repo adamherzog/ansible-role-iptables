@@ -1,0 +1,44 @@
+# {{ ansible_managed }}
+*filter
+
+#  Allow all loopback (lo0) traffic and drop all traffic to 127/8 that doesn't use lo0
+-A INPUT -i lo -j ACCEPT
+-A INPUT -d 127.0.0.0/8 -j REJECT
+
+#  Accept all established inbound connections
+-A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+
+#  Allow all outbound traffic - you can modify this to only allow certain traffic
+-A OUTPUT -j ACCEPT
+
+# Forwarded ports.
+{# Add a rule for each forwarded port #}
+{% for forwarded_port in iptables_forwarded_tcp_ports %}
+-t nat -I PREROUTING -p tcp --dport {{ forwarded_port.src }} -j REDIRECT --to-port {{ forwarded_port.dest }}
+{% endfor %}
+{% for forwarded_port in iptables_forwarded_udp_ports %}
+-t nat -I PREROUTING -p udp --dport {{ forwarded_port.src }} -j REDIRECT --to-port {{ forwarded_port.dest }}
+{% endfor %}
+
+# Open ports.
+{# Add a rule for each open port #}
+{% for port in iptables_allowed_tcp_ports %}
+-A INPUT -p tcp -m tcp --dport {{ port }} -j ACCEPT
+{% endfor %}
+{% for port in iptables_allowed_udp_ports %}
+-A INPUT -p tcp -m udp --dport {{ port }} -j ACCEPT
+{% endfor %}
+
+# Allow ping
+-A INPUT -p icmp -j ACCEPT
+
+# Additional custom rules.
+{% for rule in iptables_additional_rules %}
+{{ rule }}
+{% endfor %}
+
+#  Drop all other inbound - default deny unless explicitly allowed policy
+-A INPUT -j DROP
+-A FORWARD -j DROP
+
+COMMIT
