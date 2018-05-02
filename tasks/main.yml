@@ -16,11 +16,11 @@
 
 - name: activate firewall rules
   shell: iptables-restore < /etc/iptables.firewall.rules
-  when: install_firewall_rules|changed
+  when: install_firewall_rules is changed
 
 - name: save firewall rules
   command: service iptables save
-  when: install_firewall_rules|changed
+  when: install_firewall_rules is changed
 
 - name: ensure iptables is running and enabled
   service:
