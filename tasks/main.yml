@@ -20,6 +20,8 @@
 
 - name: save firewall rules
   command: service iptables save
+  args:
+    warn: no
   when: install_firewall_rules is changed
 
 - name: ensure iptables is running and enabled
